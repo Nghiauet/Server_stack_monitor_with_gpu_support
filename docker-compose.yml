@@ -21,6 +21,12 @@ services:
     devices:
       - /dev/nvidiactl:/dev/nvidiactl
       - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidia1:/dev/nvidia1
+      - /dev/nvidia2:/dev/nvidia2
+      - /dev/nvidia3:/dev/nvidia3
+      - /dev/nvidia4:/dev/nvidia4
+      - /dev/nvidia5:/dev/nvidia5
+      - /dev/nvidia6:/dev/nvidia6
     volumes:
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
@@ -28,18 +34,44 @@ services:
     # ports:
     #   - 9835:9835 # dont need to expose port because prometheus will in same docker network
 
+  dcgm_exporter:
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:${DCGM_EXPORTER_IMAGE_TAG}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    restart: always
+    environment:
+      - DCGM_EXPORTER_NO_HOSTNAME=1
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - 9400:9400"
+
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
       - 9090:9090
     # network_mode: host # if node_exporter expose port to host network
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      - --storage.tsdb.retention.time=30d
     restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
     depends_on:
       - node_exporter
+      - nvidia_smi_exporter
+      - dcgm_exporter
 
   grafana:
     image: grafana/grafana:latest
@@ -49,7 +81,7 @@ services:
     restart: unless-stopped
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=vinuni@123
     volumes:
       - grafana_data:/var/lib/grafana
 
