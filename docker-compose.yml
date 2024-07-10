@@ -6,13 +6,10 @@ services:
     container_name: node_exporter
     command:
       - '--path.rootfs=/host'
-    # network_mode: host # if want to expose port to host network
-    # ports:
-    #   - 9100:9100
     pid: host
     restart: unless-stopped
     volumes:
-      - '/:/host:ro,rslave' 
+      - '/:/host:ro,rslave'
 
   nvidia_smi_exporter:
     image: utkuozdemir/nvidia_gpu_exporter:1.1.0
@@ -25,21 +22,19 @@ services:
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
       - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi
-    # ports:
-    #   - 9835:9835 # dont need to expose port because prometheus will in same docker network
 
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
       - 9090:9090
-    # network_mode: host # if node_exporter expose port to host network
     restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
     depends_on:
       - node_exporter
+      - cadvisor
 
   grafana:
     image: grafana/grafana:latest
@@ -48,10 +43,25 @@ services:
       - 3000:3000
     restart: unless-stopped
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=nghiaph
+      - GF_SECURITY_ADMIN_PASSWORD=nghiaclear
     volumes:
       - grafana_data:/var/lib/grafana
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    privileged: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
 
 volumes:
   prom_data:
