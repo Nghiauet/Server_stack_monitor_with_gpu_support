@@ -45,6 +45,7 @@ https://github.com/prometheus/node_exporter
 https://github.com/utkuozdemir/nvidia_gpu_exporter
 
 # Grafana board template
+https://grafana.com/grafana/dashboards/21361-docker-cadvisor-compute-resources/
 
 https://grafana.com/grafana/dashboards/1860-node-exporter-full/
 
