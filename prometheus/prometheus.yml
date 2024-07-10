@@ -10,7 +10,11 @@ scrape_configs:
   - job_name: "nvidia_gpu_exporter"
     static_configs:
       - targets: ["nvidia_smi_exporter:9835"]
+  - job_name: 'dcgm'
 
   - job_name: "cadvisor"
     static_configs:
       - targets: ["cadvisor:8080"]
+
+    static_configs:
+      - targets: ['dcgm_exporter:9400']
