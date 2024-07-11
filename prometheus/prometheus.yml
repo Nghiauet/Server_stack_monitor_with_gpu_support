@@ -1,22 +1,22 @@
 global:
-  scrape_interval: 15s
+  scrape_interval: 30s
 
 scrape_configs:
 
   - job_name: "node_exporter"
+    scrape_interval: 30s
     static_configs:
-    scrape_interval: 15s
       - targets: ["node_exporter:9100"]
 
   - job_name: "nvidia_gpu_exporter"
+    scrape_interval: 30s
     static_configs:
-    scrape_interval: 15s
       - targets: ["nvidia_smi_exporter:9835"]
   # - job_name: 'dcgm'
   #   static_configs:
   #     - targets: ['dcgm_exporter:9400']
 
   - job_name: "cadvisor"
-    scrape_interval: 30s
+    scrape_interval: 60s
     static_configs:
       - targets: ["cadvisor:8080"]

@@ -67,7 +67,7 @@ services:
     devices:
       - /dev/kmsg
     command:
-      - '-housekeeping_interval=15s'
+      - '-housekeeping_interval=30s'
       - '-docker_only=true'
   prometheus:
     image: prom/prometheus:v2.36.1
