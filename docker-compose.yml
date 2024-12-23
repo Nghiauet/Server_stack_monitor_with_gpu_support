@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -12,7 +10,9 @@ services:
     pid: host
     restart: unless-stopped
     volumes:
-      - '/:/host:ro,rslave' 
+      - '/:/host:ro,rslave'
+    networks:
+      - my_shared_network
 
   nvidia_smi_exporter:
     image: utkuozdemir/nvidia_gpu_exporter:1.1.0
@@ -33,6 +33,8 @@ services:
       - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi
     # ports:
     #   - 9835:9835 # dont need to expose port because prometheus will in same docker network
+    networks:
+      - my_shared_network
 
   # dcgm_exporter:
   #   image: nvcr.io/nvidia/k8s/dcgm-exporter:2.4.6-2.6.10-ubuntu20.04
@@ -51,24 +53,28 @@ services:
   #     - SYS_ADMIN
     # ports:
     #   - 9400:9400
+    # networks:
+    #   - shared_network
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
-    container_name: cadvisor
-    privileged: true
-    ports:
-      - "8080:8080"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    devices:
-      - /dev/kmsg
-    command:
-      - '-housekeeping_interval=30s'
-      - '-docker_only=true'
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:v0.49.1
+  #   container_name: cadvisor
+  #   privileged: true
+  #   ports:
+  #     - "49152:8080"
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /dev/disk/:/dev/disk:ro
+  #   devices:
+  #     - /dev/kmsg
+  #   command:
+  #     - '-housekeeping_interval=30s'
+  #     - '-docker_only=true'
+  #   networks:
+  #     - my_shared_network
   prometheus:
     image: prom/prometheus:v2.36.1
     container_name: prometheus
@@ -89,6 +95,8 @@ services:
       - node_exporter
       - nvidia_smi_exporter
       # - dcgm_exporter
+    networks:
+      - my_shared_network
 
   grafana:
     image: grafana/grafana:8.5.6
@@ -101,7 +109,15 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    networks:
+      - my_shared_network
 
 volumes:
   prom_data:
   grafana_data:
+
+networks:
+  my_shared_network:
+    external: true
+    name: my_shared_network
