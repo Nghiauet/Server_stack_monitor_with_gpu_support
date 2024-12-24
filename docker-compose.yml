@@ -20,13 +20,7 @@ services:
     restart: unless-stopped
     devices:
       - /dev/nvidiactl:/dev/nvidiactl
-      - /dev/nvidia0:/dev/nvidia0
-      # - /dev/nvidia1:/dev/nvidia1
-      # - /dev/nvidia2:/dev/nvidia2
-      # - /dev/nvidia3:/dev/nvidia3
-      # - /dev/nvidia4:/dev/nvidia4
-      # - /dev/nvidia5:/dev/nvidia5
-      # - /dev/nvidia6:/dev/nvidia6
+      - /dev/nvidia0:/dev/nvidia0f
     volumes:
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
