@@ -4,16 +4,13 @@ services:
     container_name: node_exporter
     command:
       - '--path.rootfs=/host'
-    # network_mode: host # if want to expose port to host network
-    # ports:
-    #   - 9100:9100
     pid: host
     restart: unless-stopped
     volumes:
       - '/:/host:ro,rslave'
     networks:
       - my_shared_network
-
+    
   nvidia_smi_exporter:
     image: utkuozdemir/nvidia_gpu_exporter:1.1.0
     container_name: nvidia_smi_exporter
@@ -25,56 +22,33 @@ services:
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
       - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi
-    # ports:
-    #   - 9835:9835 # dont need to expose port because prometheus will in same docker network
     networks:
       - my_shared_network
 
-  # dcgm_exporter:
-  #   image: nvcr.io/nvidia/k8s/dcgm-exporter:2.4.6-2.6.10-ubuntu20.04
-  #   container_name: dcgm_exporter
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: all
-  #             capabilities: [ gpu ]
-  #   restart: always
-  #   environment:
-  #     - DCGM_EXPORTER_NO_HOSTNAME=1
-  #   cap_add:
-  #     - SYS_ADMIN
-    # ports:
-    #   - 9400:9400
-    # networks:
-    #   - shared_network
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    command:
+      - '-housekeeping_interval=30s'
+      - '-docker_only=true'
+    networks:
+      - my_shared_network
+    restart: unless-stopped
 
-  # cadvisor:
-  #   image: gcr.io/cadvisor/cadvisor:v0.49.1
-  #   container_name: cadvisor
-  #   privileged: true
-  #   ports:
-  #     - "49152:8080"
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:ro
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-  #     - /dev/disk/:/dev/disk:ro
-  #   devices:
-  #     - /dev/kmsg
-  #   command:
-  #     - '-housekeeping_interval=30s'
-  #     - '-docker_only=true'
-  #   networks:
-  #     - my_shared_network
   prometheus:
     image: prom/prometheus:v2.36.1
     container_name: prometheus
     ports:
       - 9090:9090
-    # network_mode: host # if node_exporter expose port to host network
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -88,10 +62,11 @@ services:
     depends_on:
       - node_exporter
       - nvidia_smi_exporter
-      # - dcgm_exporter
+      - cadvisor
+      - liquidctl-exporter
     networks:
       - my_shared_network
-
+  
   grafana:
     image: grafana/grafana:8.5.6
     container_name: grafana

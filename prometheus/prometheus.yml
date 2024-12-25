@@ -12,11 +12,13 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["nvidia_smi_exporter:9835"]
-  # - job_name: 'dcgm'
-  #   static_configs:
-  #     - targets: ['dcgm_exporter:9400']
-
+  
   - job_name: "cadvisor"
-    scrape_interval: 60s
+    scrape_interval: 30s
     static_configs:
       - targets: ["cadvisor:8080"]
+  
+  - job_name: "liquidctl-exporter"
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["liquidctl-exporter:9530"]
