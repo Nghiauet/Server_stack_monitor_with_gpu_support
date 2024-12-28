@@ -17,8 +17,8 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["cadvisor:8080"]
-  
-  - job_name: "liquidctl-exporter"
+
+  - job_name: "nvitop-exporter"
     scrape_interval: 30s
     static_configs:
-      - targets: ["liquidctl-exporter:9530"]
+      - targets: ["nvitop-exporter:9102"]

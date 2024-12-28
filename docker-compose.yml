@@ -10,7 +10,24 @@ services:
       - '/:/host:ro,rslave'
     networks:
       - my_shared_network
-    
+
+  nvitop-exporter:
+    image: phnghiapro/nvitop-exporter:0.1.2
+    container_name: nvitop-exporter
+    runtime: nvidia
+    pid: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - 9102:9102
+    restart: unless-stopped
+    networks:
+      - my_shared_network
   nvidia_smi_exporter:
     image: utkuozdemir/nvidia_gpu_exporter:1.1.0
     container_name: nvidia_smi_exporter
@@ -63,7 +80,7 @@ services:
       - node_exporter
       - nvidia_smi_exporter
       - cadvisor
-      - liquidctl-exporter
+      - nvitop-exporter
     networks:
       - my_shared_network
   
