@@ -12,8 +12,9 @@ services:
       - my_shared_network
 
   nvitop-exporter:
-    image: phnghiapro/nvitop-exporter:0.1.2
+    image: phnghiapro/nvitop-exporter:0.2
     container_name: nvitop-exporter
+    privileged: true
     runtime: nvidia
     pid: host
     deploy:
@@ -23,18 +24,27 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    ports:
-      - 9102:9102
     restart: unless-stopped
+    volumes:
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
     networks:
       - my_shared_network
+
   nvidia_smi_exporter:
     image: utkuozdemir/nvidia_gpu_exporter:1.1.0
     container_name: nvidia_smi_exporter
     restart: unless-stopped
     devices:
       - /dev/nvidiactl:/dev/nvidiactl
-      - /dev/nvidia0:/dev/nvidia0f
+      - /dev/nvidia0:/dev/nvidia0
+      # - /dev/nvidia1:/dev/nvidia1
+      # - /dev/nvidia2:/dev/nvidia2
+      # - /dev/nvidia3:/dev/nvidia3
+      # - /dev/nvidia4:/dev/nvidia4
+      # - /dev/nvidia5:/dev/nvidia5
+      # - /dev/nvidia6:/dev/nvidia6
+      # - /dev/nvidia7:/dev/nvidia7
     volumes:
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
