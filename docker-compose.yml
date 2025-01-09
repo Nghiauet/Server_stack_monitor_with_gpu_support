@@ -12,7 +12,7 @@ services:
       - my_shared_network
 
   nvitop-exporter:
-    image: phnghiapro/nvitop-exporter:0.2
+    image: phnghiapro/nvitop-exporter:0.3
     container_name: nvitop-exporter
     privileged: true
     runtime: nvidia
