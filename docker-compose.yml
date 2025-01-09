@@ -38,13 +38,13 @@ services:
     devices:
       - /dev/nvidiactl:/dev/nvidiactl
       - /dev/nvidia0:/dev/nvidia0
-      # - /dev/nvidia1:/dev/nvidia1
-      # - /dev/nvidia2:/dev/nvidia2
-      # - /dev/nvidia3:/dev/nvidia3
-      # - /dev/nvidia4:/dev/nvidia4
-      # - /dev/nvidia5:/dev/nvidia5
-      # - /dev/nvidia6:/dev/nvidia6
-      # - /dev/nvidia7:/dev/nvidia7
+      - /dev/nvidia1:/dev/nvidia1
+      - /dev/nvidia2:/dev/nvidia2
+      - /dev/nvidia3:/dev/nvidia3
+      - /dev/nvidia4:/dev/nvidia4
+      - /dev/nvidia5:/dev/nvidia5
+      - /dev/nvidia6:/dev/nvidia6
+      - /dev/nvidia7:/dev/nvidia7
     volumes:
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
@@ -72,7 +72,7 @@ services:
     restart: unless-stopped
 
   prometheus:
-    image: prom/prometheus:v2.36.1
+    image: prom/prometheus:3.1.0
     container_name: prometheus
     ports:
       - 9090:9090
@@ -82,6 +82,7 @@ services:
       - --web.console.libraries=/usr/share/prometheus/console_libraries
       - --web.console.templates=/usr/share/prometheus/consoles
       - --storage.tsdb.retention.time=30d
+      - --web.enable-remote-write-receiver
     restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus
@@ -95,7 +96,7 @@ services:
       - my_shared_network
   
   grafana:
-    image: grafana/grafana:8.5.6
+    image: grafana/grafana-oss:9.5.21
     container_name: grafana
     ports:
       - 3000:3000
